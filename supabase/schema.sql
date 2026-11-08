@@ -9,6 +9,7 @@ create table if not exists public.user_data (
 
 alter table public.user_data enable row level security;
 revoke all on public.user_data from anon;
+grant select, insert, update, delete on public.user_data to authenticated;
 
 drop policy if exists "user_data_select_own" on public.user_data;
 drop policy if exists "user_data_insert_own" on public.user_data;
