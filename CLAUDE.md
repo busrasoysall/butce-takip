@@ -3,6 +3,31 @@
 Bu dosya, projeyi Claude.ai sohbetinde geliştirdikten sonra Claude Code'a devretmek için yazıldı.
 Önce bunu oku. Kullanıcı **Türkçe** konuşur; arayüz metinleri ve kullanıcıyla iletişim Türkçe olmalı.
 
+## 0. GÜNCEL MİMARİ (Kasım 2026): React sürümü — önce bunu oku
+Uygulama artık **React 19 + TypeScript + Vite 8 + Tailwind v4 + motion (animasyon) + lucide-react (simgeler)**. Kaynak: `web/`. Dağıtım: Vercel, repo kökündeki
+`vercel.json` (`npm --prefix web install` / `npm --prefix web run build`, çıktı `web/dist`). Eski tek dosyalık sürüm `web/public/eski/index.html` olarak `/eski/` adresinde
+durur (Ayarlar'da bağlantı var); **artık geliştirilmez**, yalnız yedek/geri dönüş içindir. §1–§9 ve §11–§13 eski sürümü anlatır; **veri modeli (§4), localStorage anahtarları (§5)
+ve Supabase giriş/senkron mantığı (§6) React sürümünde aynen geçerli** (aynı anahtarlar, aynı tablo, mevcut oturum ve veriler korunur). Yerel hesap modu React sürümünde yoktur.
+
+Komutlar (web/ içinde): `npm install`, `npm run dev`, `npm run build` (tsc + vite; çıktı `web/dist`). Test: sahte Supabase (GoTrue + PostgREST) sunucusuyla,
+aynı origin'den servis edilen `dist` ile (CORS gerekmez); `config.js` içindeki `sbUrl` o sunucuya işaret eder.
+
+Kod haritası (`web/src`):
+- `lib/types.ts` veri tipleri · `lib/util.ts` biçim/tarih/ayrıştırıcı (`ev`) · `lib/budget.ts` hesaplar (`T`, `cb`, `health`, `insights`, `txs`, `notifCards`, `chartData`…)
+- `lib/store.ts` tek global durum (`useApp`, `setS`, `mutate`, `commit`, `save`, `go`) · `lib/ui.ts` komut tipi pencereler (`F` form, `ask`, `toast`, `showTxt`, `choose`, `showImage`)
+- `lib/auth.ts` Supabase Auth REST (`sb`, `signIn`, `signUp`, `recover`, `handleHash`, `bootAuth`…) · `lib/sync.ts` bulut senkronu (`syd`, `sypush`, `sypull`)
+- `lib/forms.ts` form açan eylemler (`addExpense`, `addIncome`, `addCard`…) · `lib/misc.ts` ses, altın fiyatı, yedek/CSV, bildirim, fiş fotoğrafı · `lib/themes.ts` 10 renk teması
+- `components/` `Shell` (üst çubuk, çekmece, alt çubuk, FAB, sürüklenebilir düğmeler), `kit` (Sheet, Seg, Bar, Num, UIHost…), `Calculator`, `Notes`, `Icons`, `Logo`
+- `pages/` `Home`, `Flow` (Gelir, Sabit giderler, Günlük), `Assets` (Yatırım, Kartlar), `More` (Takvim, Grafik, Bildirim, Hareket, Hedefler), `Settings`, `Login`
+
+Kurallar / tuzaklar:
+- Veri `getD()` ile **yerinde değiştirilir**, sonra `commit()`/`mutate()` ile kaydedilir (eski mantık). `F(...)` formunun `ok` geri çağrısı `false` dönmezse kaydeder.
+- **iOS yakınlaştırma hatası:** 16 px altı alan yazısı odakta sayfayı yakınlaştırır. Tüm `input/select/textarea` `font-size:max(16px,1rem)`; viewport'ta `maximum-scale` yok. Boyut ayarı artık CSS `zoom` değil `html{font-size:calc(16px*var(--fs))}` (rem).
+- `Sheet`/`Dlg` efektleri `onClose`'u **ref** ile okur (bağımlılığa koymak sonsuz güncelleme döngüsü yapar: React #185).
+- Animasyonlar `motion/react`; `prefers-reduced-motion` desteklenir (`MotionConfig reducedMotion="user"`). Sayfa geçişi `AnimatePresence mode="wait"`.
+- Servis çalışanı `web/public/sw.js` (`/assets/*` önce önbellek, sayfa önce ağ, `/eski/` ve `config.js` her zaman ağdan). Yayında sürüm adını (`V`) artır.
+- `web/public/config.js` Supabase URL + anon anahtar (gizli değil). Simgeler: `web/public/icon-*.png` (yeni B logosu), `logo.svg`.
+
 ## 1. Proje nedir
 Türkiye'ye yönelik kişisel bütçe takip uygulaması ("Bütçe Takip"). Şimdilik **tek dosyalık PWA**
 (`index.html`, ~90 KB, inline CSS + JS, derleme adımı yok). Hedef: önce kullanıcının kendi telefonu
@@ -162,7 +187,7 @@ onay modalı `#y_`, `window.APP_CFG={sbUrl:'http://localhost:PORT',sbKey:'TEST'}
 - Veriler cihazda tutulduğu için "veriler korunuyor" demek şimdilik doğru değil; kullanıcıya yedek almasını söyle.
 - Giriş sistemi (bulut modu) gerçek sunucuyla doğrulanmadan "güvenli" diye sunma.
 
-## 13. Arayüz prototipi (React + shadcn/ui) — deneme
+## 13. (ESKİ) Arayüz prototipi (React + shadcn/ui) — artık ana uygulamanın içinde, bu bölüm geçersiz
 `web-shadcn/` = Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui (base-nova) projesi. Yalnızca **ana sayfa** var; veriyi aynı origin'deki
 localStorage'dan **salt okunur** okur (`bt_cl` → `bt_d_<uid>` ya da `bt_sess` → `bt_d_<ad>`; yoksa örnek veri). Diğer sayfalar eski uygulamaya (`/`) bağlanır.
 Derleme çıktısı kök dizinde `prototip/shadcn/` (commit'li; Vercel `/prototip/shadcn/` adresinde statik yayınlar). Derlemek için:

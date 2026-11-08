@@ -2,3 +2,4 @@ butce-takip-pwa.zip
 .vercel
 node_modules
 .env*
+web/dist

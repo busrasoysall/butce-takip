@@ -20,7 +20,7 @@ farkli telefonlarda ayni hesapla giris ve verilerin buluta kaydi calisir.
    gonderir; cok kullanici gelirse Project Settings > Auth > SMTP'den kendi servisini bagla.
 6. Project Settings > API: "Project URL" ve "anon public" (veya "publishable") anahtari
    kopyala. DIKKAT: "service_role" / "secret" anahtarini ASLA kopyalama, kimseyle paylasma.
-7. `config.js` dosyasini ac, iki degeri yaz:
+7. `web/public/config.js` dosyasini ac, iki degeri yaz:
        window.APP_CFG={sbUrl:"https://XXXX.supabase.co",sbKey:"BURAYA_ANON_ANAHTAR"};
 8. Degisikligi GitHub'a gonder (git push); Vercel otomatik yeniden yayinlar.
 
