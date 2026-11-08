@@ -8,9 +8,9 @@ Türkiye'ye yönelik kişisel bütçe takip uygulaması ("Bütçe Takip"). Şimd
 (`index.html`, ~90 KB, inline CSS + JS, derleme adımı yok). Hedef: önce kullanıcının kendi telefonu
 ve birkaç arkadaşı, sonra App Store / Google Play.
 
-Klasör: `index.html` (uygulama), `config.js` (Firebase anahtarı), `manifest.webmanifest`, `sw.js`
+Klasör: `index.html` (uygulama), `config.js` (Supabase URL + anon anahtar), `manifest.webmanifest`, `sw.js`
 (service worker, önbellek adı `butce-vN`; her yayında sürümü artır), `icon-180/192/512.png`,
-`KURULUM.md` (Firebase kurulum rehberi), bu dosya.
+`KURULUM.md` (Supabase kurulum rehberi), `supabase/schema.sql` (veritabanı şeması), bu dosya.
 
 Çalıştırma: `python3 -m http.server 8080` ve `http://localhost:8080` (service worker için http/https gerekir).
 Yayın (Vercel): GitHub reposu (`main` dalı) Vercel'e bağlı; `git push` otomatik yayınlar. Derleme komutu yok, çıktı klasörü kök (`.`). Her yayında `sw.js` içindeki `butce-vN` sürümünü artır.
@@ -58,21 +58,31 @@ karta ödeme yapılınca ana paradan düşer. `T().dc` = kartla harcanan (ay son
 (`cht`, `ntf`) kartlı harcamayı da kategori olarak sayar (tahakkuk esası); ana sayfa oranı/skor nakit esaslıdır.
 
 ## 5. localStorage anahtarları
-`bt_acc`, `bt_cl`, `bt_ct`, `bt_d_`, `bt_fl`, `bt_fs`, `bt_lk`, `bt_oh`, `bt_orb`, `bt_rst`, `bt_sess`, `bt_t`, `bt_th`, `bt_users`
-(`bt_d_<kullanıcı adı | uid>` = kullanıcı verisi. Bulut modunda anahtar Firebase `uid`, yerel modda kullanıcı adıdır: `UK()`.)
+`bt_acc`, `bt_cl`, `bt_ct`, `bt_d_`, `bt_fl`, `bt_fs`, `bt_lk`, `bt_m_`, `bt_oh`, `bt_orb`, `bt_rst`, `bt_sess`, `bt_t`, `bt_th`, `bt_users`
+(`bt_d_<kullanıcı adı | uid>` = kullanıcı verisi. Bulut modunda anahtar Supabase `uid`; `bt_m_<uid>` = senkron meta, yerel modda kullanıcı adıdır: `UK()`.)
 
-## 6. Giriş sistemi (iki mod)
-`window.APP_CFG.fbKey` (config.js) **boşsa yerel mod**, doluysa **bulut (Firebase) modu**. `CLOUD` sabiti buna bakar.
+## 6. Giriş sistemi ve bulut (Supabase)
+`window.APP_CFG.sbUrl` + `sbKey` (config.js) **boşsa yerel mod**, doluysa **bulut (Supabase) modu**. `CLOUD` sabiti buna bakar.
+Firebase **kullanılmıyor** (kullanıcı karar verdi); kodda izi yok.
 - **Yerel mod** (`loginL/actL`): hesaplar `bt_acc` içinde; şifre PBKDF2-SHA256 (150.000 tur, hesap başına tuz). 5 yanlış denemede 30 sn kilit.
   Eski düz metin hesaplar (`bt_users`) ilk girişte hash'e geçirilir ve e-posta ister (`addMail`). Şifre sıfırlama burada **demo**
   (`MAIL.mode='demo'`, "Test modu" kutusu): bağlantıyı ekranda gösterir. **Üretimde kaldırılmalı (güvenlik açığı).**
-- **Bulut modu** (`loginC/actC`): Firebase Identity Toolkit REST (`accounts:signUp, signInWithPassword, update, lookup, sendOobCode`
-  ve `securetoken.googleapis.com/v1/token` ile yenileme). Giriş **sadece e-posta + şifre**; kullanıcı adı = `displayName`.
-  E-posta doğrulaması zorunlu (`vf` ekranı). Oturum `bt_cl` (refresh token) ile kalıcı; çevrimdışı açılır, çevrimiçiyken `cbg()` doğrular.
-  Şifre değiştir = sıfırlama e-postası gönderir.
-- **Gerçek Firebase ile hiç test edilmedi.** Sadece Playwright'ta sahte API ile test edildi (kayıt, doğrulama kapısı, oturum kalıcılığı,
-  çevrimdışı, yanlış şifre, aynı e-posta, sıfırlama). İlk iş: `config.js`'e gerçek `fbKey` koyup uçtan uca dene (`KURULUM.md`).
-- Veriler hâlâ **cihazda**; Firebase sadece kimlik doğrular. Farklı telefonda aynı hesapla girilir ama veri gelmez (sıradaki büyük iş).
+- **Bulut modu** (`loginC/actC`): Supabase Auth (GoTrue) REST: `/auth/v1/signup, token?grant_type=password|refresh_token, recover, resend, user, logout`
+  (`sb()` yardımcısı; hata kodları `SEC` tablosuyla `FE` Türkçe mesajlarına çevrilir). Giriş **sadece e-posta + şifre**; kullanıcı adı = `user_metadata.name`.
+  E-posta doğrulaması zorunlu (Supabase "Confirm email" açık; doğrulanmamış girişte `email_not_confirmed` → `vf` ekranı).
+  Doğrulama / sıfırlama e-postasındaki bağlantı siteye `#access_token=...&type=signup|recovery` ile döner; `hsh()` bunu işler
+  (signup → otomatik giriş, recovery → `rp` ekranı "Yeni şifre belirle"). Oturum `bt_cl` (access+refresh token, `ex` bitiş) ile kalıcı;
+  `tok()` süresi dolmaya yakın token'ı yeniler (`rfo()` aynı anda tek yenileme). Şifre değiştir = sıfırlama e-postası gönderir.
+- **Bulut veri senkronu**: tablo `public.user_data(user_id pk, data jsonb, updated_at)` (`supabase/schema.sql`; RLS: herkes yalnız kendi satırı,
+  `updated_at` tetikleyiciyle sunucuda yenilenir). `save()` yerel kaydeder ve `syd()` ile 1,5 sn sonra `sypush()` çağırır.
+  Yerel meta `bt_m_<uid>` = `{u: bilinen sunucu updated_at, d: gönderilmemiş değişiklik var mı}`.
+  `sypush` iyimser kilitle (`PATCH ...&updated_at=eq.<u>`) yazar; satır yoksa POST; 0 satır/409 → `sycon()` çakışma penceresi
+  ("Bu cihazdaki" / "Buluttaki"). `sypull` girişte (`cbg` sonrası), sekme öne gelince ve çevrimiçi olunca çeker; yerelde bekleyen değişiklik
+  varsa kullanıcıya sorar. Çevrimdışıyken `d=1` kalır, internet gelince gönderilir. Fişler (base64) de bu satırda; büyüyünce Storage'a taşı.
+- **Gerçek Supabase ile henüz test edilmedi.** Sahte (mock) GoTrue+PostgREST sunucusuyla tarayıcıda denendi: kayıt, doğrulama bağlantısı ile
+  otomatik giriş, yanlış şifre, aynı e-posta, ikinci cihazdan veri çekme, token yenileme, çakışma (iki seçenek), çevrimdışı kuyruk, şifre sıfırlama,
+  oturum kalıcılığı, çıkış ve yerel modun bozulmaması. İlk iş: `KURULUM.md` adımlarıyla gerçek projede uçtan uca dene.
+- Yeni Supabase anahtarları (`sb_publishable_...`) JWT değildir: `Authorization` başlığına yalnız kullanıcı token'ı konur, `apikey` başlığına anahtar.
 
 ## 7. Önemli tuzaklar (hepsi yaşandı)
 1. **Tek global kapsam.** Tüm fonksiyon/const'lar üst düzey; aynı isim tekrar tanımlanırsa **sessizce sonuncusu kazanır**
@@ -122,13 +132,12 @@ E
 (Ana betik, `<script>` bloklarının sondan ikincisidir; sonuncusu service worker kaydı.)
 
 Uçtan uca test: Playwright (Python). Püf noktaları: `page.on('dialog', d=>d.dismiss())` (sandbox gibi), giriş alanları `#a1 #a2 #a3 #a4`,
-onay modalı `#y_`, `window.APP_CFG={fbKey:'TEST'}` için `context.add_init_script`, Firebase'i `context.route('**/identitytoolkit.googleapis.com/**')`
-ve `'**/securetoken.googleapis.com/**'` ile taklit et. Çıkış testlerinde giriş ekranının gelmesini `wait_for_selector('#a1')` ile bekle.
+onay modalı `#y_`, `window.APP_CFG={sbUrl:'http://localhost:PORT',sbKey:'TEST'}` için `context.add_init_script` (veya test kopyasında `config.js`), Supabase'i
+`/auth/v1/*` ve `/rest/v1/user_data` uçlarını taklit eden küçük bir sahte sunucuyla (aynı origin, CORS gerekmez) ya da `context.route` ile taklit et. Çıkış testlerinde giriş ekranının gelmesini `wait_for_selector('#a1')` ile bekle.
 
 ## 10. Yapılacaklar (öncelik sırasıyla)
-1. Gerçek Firebase ile giriş testi (`KURULUM.md`), Vercel'e yayın, telefonda deneme.
-2. **Bulut veri senkronu** (Firestore; kural: kullanıcı yalnızca `users/{uid}` belgesini okur/yazar). `D`'yi buluta yaz, yerel önbellek kalsın,
-   çakışma/çevrimdışı kuyruk, mevcut yerel veriyi ilk girişte taşıma.
+1. Supabase projesini kur (`KURULUM.md`), `config.js`'e `sbUrl`/`sbKey` yaz, Vercel adresini Supabase "Site URL"ine ekle, uçtan uca ve telefonda dene.
+2. Mevcut yerel hesap verisini ilk bulut girişinde taşıma (yerel modda `bt_d_<kullanıcı adı>` var, bulutta `bt_d_<uid>`).
 3. Demo şifre sıfırlamayı (`MAIL.mode`, "Test modu") ve yerel hesap modunu üretimde kaldır.
 4. **Hesap silme** (Apple, uygulama içi hesap oluşturma varsa uygulama içinde silme ister — kuralı doğrula), e-posta değiştirme.
 5. Fişleri IndexedDB/bulut depolamaya taşı; fiş okumayı sunucu üzerinden yap.

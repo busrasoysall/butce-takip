@@ -1,26 +1,35 @@
-# Butce Takip: Guvenli Giris Kurulumu (Firebase, ucretsiz)
+# Butce Takip: Supabase Kurulumu (giris + bulut veritabani, ucretsiz plan yeter)
 
-Bu adimlari bir kez yaparsin. Sonra e-posta dogrulama, sifremi unuttum e-postasi
-ve farkli telefonlarda ayni hesapla giris calisir.
+Bu adimlari bir kez yaparsin. Sonra e-posta dogrulama, sifremi unuttum e-postasi,
+farkli telefonlarda ayni hesapla giris ve verilerin buluta kaydi calisir.
 
-1. https://console.firebase.google.com adresine Google hesabinla gir, "Proje ekle" de.
-   Google Analytics'i simdilik kapali birakabilirsin.
-2. Soldan Build > Authentication > "Get started". Sign-in method sekmesinde
-   "Email/Password" secenegini ac ve kaydet. ("Email link" kismini acma.)
-3. Authentication > Templates: "Email address verification" ve "Password reset"
-   sablonlarinda dili Turkce yap. Istersen gonderici adini "Butce Takip" yap.
-4. Authentication > Settings > Authorized domains: uygulamayi koydugun adresi
-   (ornegin bir-isim.vercel.app) ekle.
-5. Project settings (disli simge) > General > "Web API Key" degerini kopyala.
-6. Bu klasordeki config.js dosyasini bir metin editoruyle ac, tirnaklarin arasina yapistir:
-       window.APP_CFG={fbKey:"BURAYA_YAPISTIR"};
-7. Degisikligi GitHub'a gonder (git push); Vercel otomatik yeniden yayinlar.
+1. https://supabase.com adresinde "Start your project" de, GitHub hesabinla giris yap.
+   "New project" ile proje olustur (isim: butce-takip, bolge: Frankfurt/EU, guclu bir
+   veritabani sifresi sec ve bir yere kaydet. Bu sifre uygulamada kullanilmaz).
+2. Soldan SQL Editor > New query. Bu klasordeki `supabase/schema.sql` dosyasinin
+   tamamini yapistir ve Run de. "Success" gormelisin. (user_data tablosu ve guvenlik
+   kurallari olusur: herkes sadece kendi verisini okur/yazar.)
+3. Authentication > Sign In / Providers > Email: acik olsun, "Confirm email" acik olsun,
+   minimum sifre uzunlugu 6 olsun.
+4. Authentication > URL Configuration:
+   - Site URL: Vercel adresin (ornek: https://butce-takip.vercel.app)
+   - Redirect URLs: ayni adresi ve `https://butce-takip.vercel.app/**` ekle.
+   (Dogrulama ve sifre sifirlama e-postalarindaki baglanti buraya doner.)
+5. Authentication > Emails > Templates: "Confirm signup" ve "Reset password"
+   sablonlarini Turkce yap (konu ve metin). Hazir e-posta servisi saatte az sayida mail
+   gonderir; cok kullanici gelirse Project Settings > Auth > SMTP'den kendi servisini bagla.
+6. Project Settings > API: "Project URL" ve "anon public" (veya "publishable") anahtari
+   kopyala. DIKKAT: "service_role" / "secret" anahtarini ASLA kopyalama, kimseyle paylasma.
+7. `config.js` dosyasini ac, iki degeri yaz:
+       window.APP_CFG={sbUrl:"https://XXXX.supabase.co",sbKey:"BURAYA_ANON_ANAHTAR"};
+8. Degisikligi GitHub'a gonder (git push); Vercel otomatik yeniden yayinlar.
 
 Notlar
-- Web API Key gizli bir sifre degil, herkese acik olabilir. Guvenligi Firebase saglar.
-  Yine de Google Cloud Console > APIs & Services > Credentials'ta bu anahtari sadece
-  kendi adresine (HTTP referrer) kisitlamani oneririm.
-- Hesaplar ve sifreler Google'in sunucularinda saklanir; sifreyi sen goremezsin.
-- Uygulama verileri (gelir, gider vb.) hala kullanicinin kendi telefonunda durur.
-  Farkli telefonda ayni hesapla giris yapilir ama veriler gelmez. Bunun icin sonraki
-  adimda bulut veritabani (Firestore) eklenmeli.
+- Project URL ve anon anahtar gizli degildir, tarayicida gorunur. Guvenligi veritabanindaki
+  RLS kurallari saglar (schema.sql). Bu yuzden RLS'i asla kapatma.
+- service_role anahtari RLS'i asar. Sadece sunucu tarafinda (Vercel Environment Variables)
+  kullanilir, kodda ve repoda hic bulunmamali.
+- Sifreler Supabase'de hash'lenerek saklanir, sen goremezsin.
+- Veriler `user_data` tablosunda, kullanici basina tek satir (JSON) olarak durur.
+  Cevrimdisiyken yapilan degisiklikler telefonda kalir, internet gelince buluta yazilir.
+  Iki cihazda ayni anda degisiklik yapilirsa uygulama hangisinin kalacagini sorar.
