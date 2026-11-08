@@ -161,3 +161,13 @@ onay modalı `#y_`, `window.APP_CFG={sbUrl:'http://localhost:PORT',sbKey:'TEST'}
 - Çoğu özellik tarayıcıda Playwright ile denendi; **gerçek iPhone/Android cihazlarda test edilmedi.**
 - Veriler cihazda tutulduğu için "veriler korunuyor" demek şimdilik doğru değil; kullanıcıya yedek almasını söyle.
 - Giriş sistemi (bulut modu) gerçek sunucuyla doğrulanmadan "güvenli" diye sunma.
+
+## 13. Arayüz prototipi (React + shadcn/ui) — deneme
+`web-shadcn/` = Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui (base-nova) projesi. Yalnızca **ana sayfa** var; veriyi aynı origin'deki
+localStorage'dan **salt okunur** okur (`bt_cl` → `bt_d_<uid>` ya da `bt_sess` → `bt_d_<ad>`; yoksa örnek veri). Diğer sayfalar eski uygulamaya (`/`) bağlanır.
+Derleme çıktısı kök dizinde `prototip/shadcn/` (commit'li; Vercel `/prototip/shadcn/` adresinde statik yayınlar). Derlemek için:
+```bash
+cd web-shadcn && npm install && npm run build
+```
+Not: `shadcn init` komutu bu ortamda yarıda kesildi; `src/lib/utils.ts` ve `src/index.css` (tema değişkenleri) elle yazıldı, bileşenler `@/lib/utils`'ten `cn` alır.
+Bu prototip eski uygulamanın yerine geçmez; karar verilirse sayfalar tek tek taşınır.
