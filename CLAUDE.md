@@ -20,13 +20,18 @@ Yayın (Vercel): GitHub reposu (`main` dalı) Vercel'e bağlı; `git push` otoma
   (`<html data-ct>`), açık/koyu mod ayrı (`<html data-theme>`). Renkler CSS değişkenleri: `--a1 --a2 --h1 --h2 --h3 --pk --bg --bg2 --card --ink --mut --ln --go --te --rd`.
 - **Tipografi:** Italik yok, kalın ve net. Font: Plus Jakarta Sans (Google Fonts, çevrimdışıysa sistem fontu).
 - **Görsel dil:** Profesyonel, şık, "gereksiz abartı yok". Emoji yok; tek tip çizgisel SVG simge.
+- **Logo:** B monogramı (beyaz gövde, zümrüt üst göbek, altın alt göbek) squircle üstünde; `LOGO` sabiti + kök dizinde `logo.svg`. `logo(n)` boyutu verir. PNG ikonlar (`icon-*.png`) henüz eski logoda; onay sonrası yenilenecek.
 - **Boyut:** Her şey `body{zoom:var(--zm,.9)}` ile biraz küçültülü; Ayarlar'da Küçük(.85)/Orta(.9)/Büyük(1).
-- **Navigasyon:** Altta yüzen çubuk: Menü (en solda, sol çekmeceyi açar), Ana, Günlük, Takvim, Kredi Kartları.
-  Üstte 🔔 Bildirimler ve ⚙ Ayarlar. Diğer sayfalar soldan açılan çekmecede. Ana sayfa dışındaki sayfalarda "‹ Ana" geri düğmesi.
+- **Navigasyon (Kasım 2026'da değişti):** Menü çubuğu artık **üstte**, logonun **solunda**: Menü (sol çekmeceyi açar), Ana, Günlük, Kartlar, Takvim; logo çubuğun sağında,
+  🔔 Bildirimler ve ⚙ Ayarlar en sağda (`R()`, sınıflar `.hn .hi .hb .ha .ht`). Aktif sayfanın etiketi görünür, diğerleri yalnız simge; çubuk dar ekranda yatay kayar.
+  Çekmecede olan sayfalar (Gelir, Giderler…) aktifken çubuğun sonunda geçici bir hap görünür. "‹ Ana" geri düğmesi kalktı (çubukta Ana var). Alt çubuk yok; FAB (+) altta.
+  Masaüstünde (≥900px) çubuk gizli, sabit kenar menü var; başlık yazısı (`.ht`) logonun yanında görünür.
   Masaüstünde (≥900px) çekmece sabit kenar menüsü.
 - **"Borçlar" adı "Kredi Kartları" oldu** (hızlı kısayolda "Kartlar").
 - **Not defteri ve hesap makinesi:** kenarda yüzen düğmeler (`orbs()`), sürüklenebilir, konum `bt_orb`'ta, Ayarlar'dan gizlenebilir (`bt_oh`). Varsayılan sol kenar.
-- **Ana sayfa:** Tarihin ("4 Kasım Çarşamba") hemen altında "Bugünün harcamaları" kartı (`tdy()`), sonra ana para kartı.
+  Paneller alt sayfa (`.mod.xm > .xs`; ≥900px'te ortada). **Hesap makinesi** (`calc()`): Hesap / KDV / Bölüş / Taksit sekmeleri, geçmiş (`bt_ch`), kopyala, klavye desteği, "harcama olarak ekle" (`cadd(v)`).
+  **Notlar** (`nbk()`): renk (6), sabitleme, arama, liste (onay kutulu) türü; alanlar `c` renk, `p` sabit, `k:'l'`+`it:[{t,x}]` liste. Eski notlar (`{id,t,d,u}`) olduğu gibi çalışır.
+- **Ana sayfa (Kasım 2026'da değişti):** Selam satırı, hemen altında **ana para kartı** (gelir/harcama/yatırım dahil) en üstte; ardından "Bugünün harcamaları" (`tdy()`), hızlı kısayollar (`qg()`), ay özeti.
 - **Kurtarma kodu istemedi.** Şifre sıfırlama e-postayla olmalı. Şifre en az 6 karakter.
 - **Aynı e-postayla tek hesap.** Kullanıcı adı seçilebilir.
 - Kartlar alt alta (üst üste binmez); kart rengi bankanın kart rengi (`BK`, `bkc()`).
@@ -58,7 +63,7 @@ karta ödeme yapılınca ana paradan düşer. `T().dc` = kartla harcanan (ay son
 (`cht`, `ntf`) kartlı harcamayı da kategori olarak sayar (tahakkuk esası); ana sayfa oranı/skor nakit esaslıdır.
 
 ## 5. localStorage anahtarları
-`bt_acc`, `bt_cl`, `bt_ct`, `bt_d_`, `bt_fl`, `bt_fs`, `bt_lk`, `bt_m_`, `bt_oh`, `bt_orb`, `bt_rst`, `bt_sess`, `bt_t`, `bt_th`, `bt_users`
+`bt_acc`, `bt_cl`, `bt_ct`, `bt_d_`, `bt_fl`, `bt_fs`, `bt_ch`, `bt_lk`, `bt_m_`, `bt_oh`, `bt_orb`, `bt_rst`, `bt_sess`, `bt_t`, `bt_th`, `bt_users`
 (`bt_d_<kullanıcı adı | uid>` = kullanıcı verisi. Bulut modunda anahtar Supabase `uid`; `bt_m_<uid>` = senkron meta, yerel modda kullanıcı adıdır: `UK()`.)
 
 ## 6. Giriş sistemi ve bulut (Supabase)
