@@ -164,7 +164,7 @@ export function Settings() {
         </div>
         <div className="row" style={{ border: 0 }}>
           <span className="t">
-            Eski sürüm<small>Yeni arayüzde sorun olursa eski ekranı açabilirsin</small>
+            Eski sürüm<small>Yeni arayüzde sorun olursa eski ekranı açabilirsin · Sürüm {__BUILD__}</small>
           </span>
           <a className="btn s" href="/eski/">
             Aç

@@ -176,6 +176,7 @@ export function Login() {
             </motion.form>
           </AnimatePresence>
         </div>
+        <p style={{ textAlign: 'center', color: '#ffffff80', fontSize: '.7rem', marginTop: '.9rem', fontWeight: 600 }}>Sürüm {__BUILD__}</p>
       </motion.div>
     </div>
   )

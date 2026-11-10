@@ -1,5 +1,5 @@
 // Bütçe Takip servis çalışanı. Sürümü her yayında artır.
-const V = 'butce-react-v2'
+const V = 'butce-react-v3'
 const SHELL = ['/', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/icon-180.png', '/logo.svg']
 
 self.addEventListener('install', (e) => {
@@ -7,10 +7,17 @@ self.addEventListener('install', (e) => {
 })
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches
-      .keys()
-      .then((k) => Promise.all(k.filter((x) => x !== V).map((x) => caches.delete(x))))
-      .then(() => self.clients.claim()),
+    (async () => {
+      const keys = await caches.keys()
+      const hadOld = keys.some((k) => k !== V)
+      await Promise.all(keys.filter((k) => k !== V).map((k) => caches.delete(k)))
+      await self.clients.claim()
+      // Güncelleme geldiyse açık sayfaları yeni sürümle yeniden yükle (eski paket ekranda kalmasın)
+      if (hadOld) {
+        const cs = await self.clients.matchAll({ type: 'window' })
+        cs.forEach((c) => c.navigate(c.url).catch(() => {}))
+      }
+    })(),
   )
 })
 self.addEventListener('fetch', (e) => {
@@ -34,9 +41,9 @@ self.addEventListener('fetch', (e) => {
     )
     return
   }
-  // sayfa ve diğerleri: önce ağ, çevrimdışıysa önbellek
+  // sayfa ve diğerleri: önce ağ (HTTP önbelleğini atlayarak), ağ yoksa önbellek
   e.respondWith(
-    fetch(r)
+    fetch(r, r.mode === 'navigate' ? { cache: 'no-store' } : undefined)
       .then((res) => {
         const copy = res.clone()
         caches.open(V).then((c) => c.put(r.mode === 'navigate' ? '/' : r, copy))
