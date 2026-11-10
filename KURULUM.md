@@ -15,6 +15,8 @@ farkli telefonlarda ayni hesapla giris ve verilerin buluta kaydi calisir.
    - Site URL: Vercel adresin (ornek: https://butce-takip.vercel.app)
    - Redirect URLs: ayni adresi ve `https://butce-takip.vercel.app/**` ekle.
    (Dogrulama ve sifre sifirlama e-postalarindaki baglanti buraya doner.)
+   GitHub Pages adresini de ekle: https://busrasoysall.github.io/butce-takip/ ve https://busrasoysall.github.io/butce-takip/**
+   (Vercel adresi bazi mobil operatorlerde acilmayabilir; Pages adresi yedek olarak kullanilir.)
 5. Authentication > Emails > Templates: "Confirm signup" ve "Reset password"
    sablonlarini Turkce yap (konu ve metin). Hazir e-posta servisi saatte az sayida mail
    gonderir; cok kullanici gelirse Project Settings > Auth > SMTP'den kendi servisini bagla.

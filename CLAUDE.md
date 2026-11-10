@@ -9,6 +9,11 @@ Uygulama artık **React 19 + TypeScript + Vite 8 + Tailwind v4 + motion (animasy
 durur (Ayarlar'da bağlantı var); **artık geliştirilmez**, yalnız yedek/geri dönüş içindir. §1–§9 ve §11–§13 eski sürümü anlatır; **veri modeli (§4), localStorage anahtarları (§5)
 ve Supabase giriş/senkron mantığı (§6) React sürümünde aynen geçerli** (aynı anahtarlar, aynı tablo, mevcut oturum ve veriler korunur). Yerel hesap modu React sürümünde yoktur.
 
+**İki adresten yayın (Kasım 2026):** Vodafone hattında `*.vercel.app` açılmadı (Supabase, vercel.com ve github.com açılıyordu), bu yüzden aynı derleme ayrıca **GitHub Pages**'te
+(`https://busrasoysall.github.io/butce-takip/`, `.github/workflows/pages.yml`, `main`'e her push) yayınlanır. Derleme **göreli yollarla** (`base:'./'`) yapılır: kökte de alt klasörde de çalışır;
+`sw.js` kapsamı `self.registration.scope`'tan, e-posta dönüş adresi `new URL('./', document.baseURI)`'den hesaplanır. Pages'i bir kez GitHub > Settings > Pages > Source = "GitHub Actions" yap;
+Supabase > Authentication > URL Configuration > Redirect URLs'e `https://busrasoysall.github.io/butce-takip/` ve `.../**` ekle. Her yayında `sw.js` içindeki `V` sürümünü artır.
+
 Komutlar (web/ içinde): `npm install`, `npm run dev`, `npm run build` (tsc + vite; çıktı `web/dist`). Test: sahte Supabase (GoTrue + PostgREST) sunucusuyla,
 aynı origin'den servis edilen `dist` ile (CORS gerekmez); `config.js` içindeki `sbUrl` o sunucuya işaret eder.
 

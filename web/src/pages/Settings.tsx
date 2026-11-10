@@ -166,7 +166,7 @@ export function Settings() {
           <span className="t">
             Eski sürüm<small>Yeni arayüzde sorun olursa eski ekranı açabilirsin · Sürüm {__BUILD__}</small>
           </span>
-          <a className="btn s" href="/eski/">
+          <a className="btn s" href="eski/">
             Aç
           </a>
         </div>

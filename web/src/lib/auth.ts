@@ -8,7 +8,8 @@ import { CFG } from './config'
 export const CLOUD = !!(CFG.sbUrl && CFG.sbKey)
 const SBU = CFG.sbUrl.replace(/\/+$/, '')
 const SBK = CFG.sbKey
-const RD = () => encodeURIComponent(location.origin + '/')
+// e-posta bağlantısının döneceği adres: uygulamanın bulunduğu klasör (kökte de alt klasörde de doğru)
+const RD = () => encodeURIComponent(new URL('./', document.baseURI).href)
 
 const FE: Record<string, string> = {
   EMAIL_EXISTS: 'Bu e-posta ile zaten bir hesap var.',
