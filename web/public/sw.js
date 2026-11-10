@@ -1,5 +1,5 @@
 // Bütçe Takip servis çalışanı. Sürümü her yayında artır.
-const V = 'butce-react-v1'
+const V = 'butce-react-v2'
 const SHELL = ['/', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/icon-180.png', '/logo.svg']
 
 self.addEventListener('install', (e) => {

@@ -3,16 +3,11 @@ import type { Session } from './types'
 import { jget, jset, EMAIL } from './util'
 import { sypull, sypush } from './sync'
 import { gauto } from './misc'
+import { CFG } from './config'
 
-declare global {
-  interface Window {
-    APP_CFG?: { sbUrl?: string; sbKey?: string }
-  }
-}
-const CFG = window.APP_CFG || {}
 export const CLOUD = !!(CFG.sbUrl && CFG.sbKey)
-const SBU = (CFG.sbUrl || '').replace(/\/+$/, '')
-const SBK = CFG.sbKey || ''
+const SBU = CFG.sbUrl.replace(/\/+$/, '')
+const SBK = CFG.sbKey
 const RD = () => encodeURIComponent(location.origin + '/')
 
 const FE: Record<string, string> = {
@@ -298,7 +293,7 @@ export function handleHash(): boolean {
 /** Uygulama açılışı: kayıtlı oturum varsa veriyi yükler. */
 export function bootAuth() {
   if (!CLOUD) {
-    setS({ phase: 'auth', flash: { mode: 'in', msg: 'Sunucu ayarı (config.js) eksik.' } })
+    setS({ phase: 'auth', flash: { mode: 'in', msg: 'Sunucu ayarı eksik. Uygulamayı güncelleyip tekrar dene.' } })
     return
   }
   if (handleHash()) return

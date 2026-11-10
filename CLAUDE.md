@@ -26,7 +26,7 @@ Kurallar / tuzaklar:
 - `Sheet`/`Dlg` efektleri `onClose`'u **ref** ile okur (bağımlılığa koymak sonsuz güncelleme döngüsü yapar: React #185).
 - Animasyonlar `motion/react`; `prefers-reduced-motion` desteklenir (`MotionConfig reducedMotion="user"`). Sayfa geçişi `AnimatePresence mode="wait"`.
 - Servis çalışanı `web/public/sw.js` (`/assets/*` önce önbellek, sayfa önce ağ, `/eski/` ve `config.js` her zaman ağdan). Yayında sürüm adını (`V`) artır.
-- `web/public/config.js` Supabase URL + anon anahtar (gizli değil). Simgeler: `web/public/icon-*.png` (yeni B logosu), `logo.svg`.
+- Supabase URL + anon anahtar `web/src/lib/config.ts` içinde **pakete gömülü** (gizli değil). Ayrı `config.js` dosyasına bağımlılık YOK: bir mobil ağda o dosya inmeyince "Sunucu ayarı eksik" hatası verdi (Kasım 2026). Test için `localStorage.bt_cfg` ya da `window.APP_CFG` ile ezilebilir; `web/public/config.js` yalnız `/eski/` için. Simgeler: `web/public/icon-*.png` (yeni B logosu), `logo.svg`.
 
 ## 1. Proje nedir
 Türkiye'ye yönelik kişisel bütçe takip uygulaması ("Bütçe Takip"). Şimdilik **tek dosyalık PWA**
